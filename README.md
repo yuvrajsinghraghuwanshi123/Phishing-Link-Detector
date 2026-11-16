@@ -10,6 +10,16 @@ This project aims to identify suspicious URL patterns through feature extraction
 
 Users can submit a URL through a web interface and receive an analysis along with a risk score and explanations for detected warning signs.
 
+## Screenshots
+
+![Screenshot 1](screenshots/Screenshot%20(1).png)
+
+![Screenshot 2](screenshots/Screenshot%20(2).png)
+
+![Screenshot 3](screenshots/Screenshot%20(3).png)
+
+![Screenshot 4](screenshots/Screenshot%20(4).png)
+
 ## Features
 
 - URL validation and parsing.
