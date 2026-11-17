@@ -12,13 +12,11 @@ Users can submit a URL through a web interface and receive an analysis along wit
 
 ## Screenshots
 
-![Screenshot 1](screenshots/Screenshot%20(1).png)
+![Screenshot 3](screenshots/Screenshot(3).png)
 
-![Screenshot 2](screenshots/Screenshot%20(2).png)
+![Screenshot 1](screenshots/Screenshot(1).png)
 
-![Screenshot 3](screenshots/Screenshot%20(3).png)
-
-![Screenshot 4](screenshots/Screenshot%20(4).png)
+![Screenshot 2](screenshots/Screenshot(2).png)
 
 ## Features
 
