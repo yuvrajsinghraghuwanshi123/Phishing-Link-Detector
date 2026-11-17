@@ -104,6 +104,62 @@ button:hover {
     color: #fbbf24;
 }
 
+
+.analysis-section {
+    margin-top: 16px;
+}
+
+.analysis-section h3 {
+    color: #38bdf8;
+    margin: 0 0 10px;
+}
+
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.analysis-item {
+    background-color: #273449;
+    padding: 10px 12px;
+    border-radius: 8px;
+    min-width: 0;
+}
+
+.analysis-label {
+    color: #94a3b8;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.analysis-value {
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+
+.status-good {
+    color: #4ade80;
+    font-weight: bold;
+}
+
+.status-warning {
+    color: #fbbf24;
+    font-weight: bold;
+}
+
+.status-danger {
+    color: #f87171;
+    font-weight: bold;
+}
+
+.status-neutral {
+    color: #38bdf8;
+    font-weight: bold;
+}
+
+
 @media (max-width: 650px) {
     body {
         padding: 14px;
@@ -119,6 +175,10 @@ button:hover {
 
     #result {
         padding: 14px;
+    }
+
+    .analysis-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -156,6 +216,20 @@ button:hover {
         "'": "&#39;"
     })[char]);
 }
+
+function displayIndicators(items) {
+    return Array.isArray(items) && items.length
+        ? items.map(item => escapeHTML(item)).join(", ")
+        : "None detected";
+}
+
+function indicatorClass(items) {
+    return Array.isArray(items) && items.length
+        ? "status-danger"
+        : "status-good";
+}
+
+
 async function analyzeURL() {
 
     const url = document.getElementById("urlInput").value.trim();
@@ -197,21 +271,20 @@ const reasons = risk.reasons.length
     ? risk.reasons.map(reason => `<li>${escapeHTML(reason)}</li>`).join("")
     : "<li>No suspicious indicators detected.</li>";
 
+
 resultDiv.innerHTML = `
     <h2>Scan Results</h2>
 
     <p>Scanned URL: ${escapeHTML(analysis.url)}</p>
 
     <div class="risk-score" style="color: ${riskColor}">
-    ${risk.score}/100
-</div>
-
-
-<div style="position: relative; width: 100%; height: 12px; background-color: #334155; border-radius: 10px; margin: 15px 0; overflow: hidden;">
-    <div style="position: absolute; top: 0; left: 0; width: ${risk.score}%; height: 100%; background-color: ${riskColor}; border-radius: 10px; transition: width 0.5s ease;">
+        ${risk.score}/100
     </div>
-</div>
 
+    <div style="position: relative; width: 100%; height: 12px; background-color: #334155; border-radius: 10px; margin: 10px 0; overflow: hidden;">
+        <div style="position: absolute; top: 0; left: 0; width: ${risk.score}%; height: 100%; background-color: ${riskColor}; border-radius: 10px; transition: width 0.5s ease;">
+        </div>
+    </div>
 
     <div class="risk-level" style="color: ${riskColor}">
         ${escapeHTML(risk.level)}
@@ -221,7 +294,92 @@ resultDiv.innerHTML = `
         <h3>Detection Reasons</h3>
         <ul>${reasons}</ul>
     </div>
+
+    <div class="analysis-section">
+        <h3>Detailed URL Analysis</h3>
+
+        <div class="analysis-grid">
+
+            <div class="analysis-item">
+                <div class="analysis-label">Hostname</div>
+                <div class="analysis-value">
+    ${escapeHTML(analysis.hostname)}
+</div>
+            </div>
+
+            <div class="analysis-item">
+                <div class="analysis-label">HTTPS Enabled</div>
+                <div class="analysis-value ${analysis.uses_https ? 'status-neutral' : 'status-warning'}">
+    ${analysis.uses_https ? "Yes" : "No"}
+</div>
+            </div>
+
+            <div class="analysis-item">
+                <div class="analysis-label">IP Address</div>
+                <div class="analysis-value ${analysis.is_ip_address ? 'status-warning' : 'status-good'}">
+    ${analysis.is_ip_address ? "Yes" : "No"}
+</div>
+            </div>
+
+            <div class="analysis-item">
+                <div class="analysis-label">URL Length</div>
+                <div class="analysis-value">${analysis.url_length} characters</div>
+            </div>
+
+            <div class="analysis-item">
+                <div class="analysis-label">Subdomain Count</div>
+                <div class="analysis-value">${analysis.subdomain_count}</div>
+            </div>
+
+            <div class="analysis-item">
+                <div class="analysis-label">Hyphen Count</div>
+                <div class="analysis-value">${analysis.hyphen_count}</div>
+            </div>
+
+            <div class="analysis-item">
+                <div class="analysis-label">Hostname Keywords</div>
+                <div class="analysis-value">${displayIndicators(analysis.hostname_keywords)}</div>
+            </div>
+
+            <div class="analysis-item">
+                <div class="analysis-label">Path Keywords</div>
+                <div class="analysis-value ${indicatorClass(analysis.path_keywords)}">
+    ${displayIndicators(analysis.path_keywords)}
+</div>
+            </div>
+
+            <div class="analysis-item">
+                <div class="analysis-label">Brand Indicators</div>
+                <div class="analysis-value ${indicatorClass(analysis.brand_indicators)}">
+    ${displayIndicators(analysis.brand_indicators)}
+</div>
+            </div>
+
+            <div class="analysis-item">
+                <div class="analysis-label">Suspicious Domain Structure</div>
+                <div class="analysis-value ${indicatorClass(analysis.suspicious_domain_structure)}">
+    ${displayIndicators(analysis.suspicious_domain_structure)}
+</div>
+            </div>
+
+            <div class="analysis-item">
+                <div class="analysis-label">Username Brand Indicators</div>
+                <div class="analysis-value ${indicatorClass(analysis.userinfo_brand_indicators)}">
+    ${displayIndicators(analysis.userinfo_brand_indicators)}
+</div>
+            </div>
+
+            <div class="analysis-item">
+                <div class="analysis-label">Username Keywords</div>
+                <div class="analysis-value ${indicatorClass(analysis.userinfo_keywords)}">
+    ${displayIndicators(analysis.userinfo_keywords)}
+</div>
+            </div>
+
+        </div>
+    </div>
 `;
+
 
     } catch (error) {
         resultDiv.textContent = "Unable to connect to the server.";

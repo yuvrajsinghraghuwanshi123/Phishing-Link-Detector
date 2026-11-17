@@ -11,13 +11,27 @@ def analyze_url(url):
     # Add HTTPS if no scheme is provided
     parsed = urlparse(url)
 
-    if not parsed.scheme:
+    if parsed.scheme.lower() not in ("http", "https"):
+
+        if "://" in url:
+            return {"error": "Invalid URL"}
+
         url = "https://" + url
+        parsed = urlparse(url)
+
+    else:
+        # Normalize scheme to lowercase
+        url = parsed._replace(
+            scheme=parsed.scheme.lower()
+        ).geturl()
+
         parsed = urlparse(url)
 
     # Allow only HTTP and HTTPS
     if parsed.scheme not in ("http", "https"):
         return {"error": "Invalid URL"}
+
+
 
     # Validate hostname
     hostname = parsed.hostname
@@ -89,7 +103,7 @@ def analyze_url(url):
     ]
 
     # Check special character
-    has_at_symbol = "@" in url
+    has_at_symbol = "@" in parsed.netloc
 
 
     # Extract domain information
@@ -97,9 +111,6 @@ def analyze_url(url):
 
     registered_domain = extracted.top_domain_under_public_suffix
     registered_domain = registered_domain.lower()
-
-    # Extract the actual registered domain name
-    domain_name = extracted.domain.lower()
 
     # Extract individual subdomain labels
     subdomain_labels = extracted.subdomain.lower().split(".") if extracted.subdomain else []
@@ -118,12 +129,7 @@ def analyze_url(url):
         if brand in subdomain_tokens and registered_domain != official_domain:
             suspicious_domain_structure.append(brand)
 
-    # Detect trusted brands appearing in subdomains
-    suspicious_domain_structure = []
 
-    for brand, official_domain in trusted_brands.items():
-        if brand in extracted.subdomain.lower().split("."):
-            suspicious_domain_structure.append(brand)
 
     # Count actual subdomains
     subdomain_count = (
@@ -205,6 +211,10 @@ def calculate_risk(analysis):
     if analysis["userinfo_brand_indicators"]:
         score += 30
         reasons.append("Trusted brand found in URL username")
+
+    if analysis["has_at_symbol"] and analysis["userinfo_brand_indicators"]:
+        score += 10
+        reasons.append("Brand impersonation combined with @ symbol")
 
     if analysis["userinfo_keywords"]:
         score += 10

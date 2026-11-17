@@ -98,7 +98,7 @@ Windows:
 **5. Install dependencies**
 
 ```bash
-pip install flask tldextract
+pip install -r requirements.txt
 ```
 
 **6. Run the application**

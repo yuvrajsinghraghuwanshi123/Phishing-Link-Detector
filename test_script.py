@@ -73,3 +73,31 @@ def test_encoded_brand_in_userinfo():
 
     assert result["hostname"] == "evil.xyz"
     assert "paypal" in result["userinfo_brand_indicators"]
+
+def test_domain_with_port():
+    result = analyze_url("example.com:8080")
+
+    assert "error" not in result
+    assert result["hostname"] == "example.com"
+    assert result["uses_https"] is True
+
+def test_uppercase_https_scheme():
+    result = analyze_url("HTTPS://google.com")
+
+    assert "error" not in result
+    assert result["uses_https"] is True
+    assert result["url"].startswith("https://")
+
+def test_at_symbol_in_path():
+    result = analyze_url("https://example.com/user@test")
+
+    assert "error" not in result
+    assert result["has_at_symbol"] is False
+
+def test_at_symbol_with_brand_username():
+    result = analyze_url("https://paypal.com@evil.xyz")
+    risk = calculate_risk(result)
+
+    assert risk["score"] == 60
+    assert risk["level"] == "High Risk"
+    assert "Brand impersonation combined with @ symbol" in risk["reasons"]
